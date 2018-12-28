@@ -93,7 +93,6 @@ impl Emitable for TcMessage {
     }
 
     fn emit(&self, buffer: &mut [u8]) {
-        // in rust, we're guaranteed that when doing `a() + b(), a() is evaluated first
         self.header.emit(buffer);
         self.nlas.as_slice().emit(buffer);
     }
@@ -114,19 +113,13 @@ impl<T: AsRef<[u8]>> Parseable<TcHeader> for TcBuffer<T> {
 impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<TcMessage> for TcBuffer<&'buffer T> {
     fn parse(&self) -> Result<TcMessage, DecodeError> {
         Ok(TcMessage {
-            header: self
-                .parse()
-                .context("failed to parse tc message header")?,
-            nlas: self
-                .parse()
-                .context("failed to parse tc message NLAs")?,
+            header: self.parse().context("failed to parse tc message header")?,
+            nlas: self.parse().context("failed to parse tc message NLAs")?,
         })
     }
 }
 
-impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<TcNla>>
-    for TcBuffer<&'buffer T>
-{
+impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<TcNla>> for TcBuffer<&'buffer T> {
     fn parse(&self) -> Result<Vec<TcNla>, DecodeError> {
         let mut nlas = vec![];
         for nla_buf in self.nlas() {
