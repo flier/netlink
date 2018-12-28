@@ -1,4 +1,5 @@
 use super::{TcBuffer, TcNla};
+use failure::ResultExt;
 use {DecodeError, Emitable, Parseable, TC_HEADER_LEN};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -112,29 +113,24 @@ impl<T: AsRef<[u8]>> Parseable<TcHeader> for TcBuffer<T> {
 
 impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<TcMessage> for TcBuffer<&'buffer T> {
     fn parse(&self) -> Result<TcMessage, DecodeError> {
-        let header = self.parse()?;
-        let parsed_nlas: Vec<Result<TcNla, DecodeError>> = self.parse()?;
-        let (valid_nlas, parse_errors): (Vec<_>, Vec<_>) =
-            parsed_nlas.into_iter().partition(Result::is_ok);
-        let nlas = valid_nlas.into_iter().map(Result::unwrap).collect();
-        // FIXME: perhaps there should be a way to access the error(s) after the message is ready?
-        for parse_result in parse_errors {
-            warn!(
-                "Failed to parse a Netlink TC message attribute: {}",
-                parse_result.unwrap_err()
-            );
-        }
-        Ok(TcMessage { header, nlas })
+        Ok(TcMessage {
+            header: self
+                .parse()
+                .context("failed to parse tc message header")?,
+            nlas: self
+                .parse()
+                .context("failed to parse tc message NLAs")?,
+        })
     }
 }
 
-impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<Result<TcNla, DecodeError>>>
+impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<TcNla>>
     for TcBuffer<&'buffer T>
 {
-    fn parse(&self) -> Result<Vec<Result<TcNla, DecodeError>>, DecodeError> {
+    fn parse(&self) -> Result<Vec<TcNla>, DecodeError> {
         let mut nlas = vec![];
         for nla_buf in self.nlas() {
-            nlas.push(nla_buf.and_then(|nla_buf| nla_buf.parse()));
+            nlas.push(nla_buf?.parse()?);
         }
         Ok(nlas)
     }
