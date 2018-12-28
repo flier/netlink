@@ -44,10 +44,11 @@ impl TcMessage {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TcHeader {
     family: u8,
-    pad1: u8,
-    pad2: u16,
+    // Interface index
     index: i32,
+    // Qdisc handle
     handle: u32,
+    // Parent Qdisc
     parent: u32,
     info: u32,
 }
@@ -62,8 +63,6 @@ impl TcHeader {
     pub fn new() -> Self {
         TcHeader {
             family: 0,
-            pad1: 0,
-            pad2: 0,
             index: 0,
             handle: 0,
             parent: 0,
@@ -103,8 +102,6 @@ impl<T: AsRef<[u8]>> Parseable<TcHeader> for TcBuffer<T> {
     fn parse(&self) -> Result<TcHeader, DecodeError> {
         Ok(TcHeader {
             family: self.family(),
-            pad1: self.pad1(),
-            pad2: self.pad2(),
             index: self.index(),
             handle: self.handle(),
             parent: self.parent(),
