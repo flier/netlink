@@ -1484,6 +1484,15 @@ pub const TCA_HW_OFFLOAD: u16 = 12;
 pub const TCA_INGRESS_BLOCK: u16 = 13;
 pub const TCA_EGRESS_BLOCK: u16 = 14;
 
+pub const TCA_STATS_UNSPEC: u16 = 0;
+pub const TCA_STATS_BASIC: u16 = 1;
+pub const TCA_STATS_RATE_EST: u16 = 2;
+pub const TCA_STATS_QUEUE: u16 = 3;
+pub const TCA_STATS_APP: u16 = 4;
+pub const TCA_STATS_RATE_EST64: u16 = 5;
+pub const TCA_STATS_PAD: u16 = 6;
+pub const TCA_STATS_BASIC_HW: u16 = 7;
+
 pub const __BITS_PER_LONG: int = 64;
 pub const __FD_SETSIZE: int = 1024;
 pub const SI_LOAD_SHIFT: int = 16;
