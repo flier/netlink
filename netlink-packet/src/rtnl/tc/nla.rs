@@ -13,7 +13,7 @@ pub enum TcNla {
     Stats(TcStats),
     XStats(Vec<u8>),
     Rate(Vec<u8>),
-    FCNT(Vec<u8>),
+    Fcnt(Vec<u8>),
     Stats2(Vec<TcStats2Nla>),
     Stab(Vec<u8>),
     HwOffload(u8),
@@ -30,7 +30,7 @@ impl Nla for TcNla {
                 | Options(ref bytes)
                 | XStats(ref bytes)
                 | Rate(ref bytes)
-                | FCNT(ref bytes)
+                | Fcnt(ref bytes)
                 | Stab(ref bytes) => bytes.len(),
             HwOffload(_) => size_of::<u8>(),
             Stats2(ref thing) => thing.as_slice().buffer_len(),
@@ -97,7 +97,7 @@ impl<'buffer, T: AsRef<[u8]> + ?Sized> Parseable<TcNla> for NlaBuffer<&'buffer T
             TCA_STATS => Stats(TcStats::from_bytes(payload)?),
             TCA_XSTATS => XStats(payload.to_vec()),
             TCA_RATE => Rate(payload.to_vec()),
-            TCA_FCNT => FCNT(payload.to_vec()),
+            TCA_FCNT => Fcnt(payload.to_vec()),
             TCA_STATS2 => {
                 let mut nlas = vec![];
                 for nla in NlasIterator::new(payload) {
