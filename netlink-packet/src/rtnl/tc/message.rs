@@ -1,5 +1,5 @@
 use super::{TcBuffer, TcNla};
-use {Emitable, Parseable, Result, TC_HEADER_LEN};
+use {DecodeError, Emitable, Parseable, TC_HEADER_LEN};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TcMessage {
@@ -100,7 +100,7 @@ impl Emitable for TcMessage {
 }
 
 impl<T: AsRef<[u8]>> Parseable<TcHeader> for TcBuffer<T> {
-    fn parse(&self) -> Result<TcHeader> {
+    fn parse(&self) -> Result<TcHeader, DecodeError> {
         Ok(TcHeader {
             family: self.family(),
             pad1: self.pad1(),
@@ -114,9 +114,9 @@ impl<T: AsRef<[u8]>> Parseable<TcHeader> for TcBuffer<T> {
 }
 
 impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<TcMessage> for TcBuffer<&'buffer T> {
-    fn parse(&self) -> Result<TcMessage> {
+    fn parse(&self) -> Result<TcMessage, DecodeError> {
         let header = self.parse()?;
-        let parsed_nlas: Vec<Result<TcNla>> = self.parse()?;
+        let parsed_nlas: Vec<Result<TcNla, DecodeError>> = self.parse()?;
         let (valid_nlas, parse_errors): (Vec<_>, Vec<_>) =
             parsed_nlas.into_iter().partition(Result::is_ok);
         let nlas = valid_nlas.into_iter().map(Result::unwrap).collect();
@@ -131,8 +131,10 @@ impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<TcMessage> for TcBuffer<&'buff
     }
 }
 
-impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<Result<TcNla>>> for TcBuffer<&'buffer T> {
-    fn parse(&self) -> Result<Vec<Result<TcNla>>> {
+impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<Vec<Result<TcNla, DecodeError>>>
+    for TcBuffer<&'buffer T>
+{
+    fn parse(&self) -> Result<Vec<Result<TcNla, DecodeError>>, DecodeError> {
         let mut nlas = vec![];
         for nla_buf in self.nlas() {
             nlas.push(nla_buf.and_then(|nla_buf| nla_buf.parse()));

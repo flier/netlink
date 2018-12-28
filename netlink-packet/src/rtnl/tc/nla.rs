@@ -1,7 +1,7 @@
 use std::mem::size_of;
 
 use utils::{parse_string, parse_u8};
-use {DefaultNla, NativeNla, Nla, NlaBuffer, Parseable, Result, NlasIterator, Emitable};
+use {DecodeError, DefaultNla, Emitable, NativeNla, Nla, NlaBuffer, NlasIterator, Parseable};
 
 use constants::*;
 
@@ -21,7 +21,7 @@ pub enum TcNla {
 }
 
 impl Nla for TcNla {
-    #[cfg_attr(nightly, rustfmt::skip)]
+    #[rustfmt::skip]
     fn value_len(&self) -> usize {
         use self::TcNla::*;
         match *self {
@@ -87,7 +87,7 @@ impl Nla for TcNla {
 }
 
 impl<'buffer, T: AsRef<[u8]> + ?Sized> Parseable<TcNla> for NlaBuffer<&'buffer T> {
-    fn parse(&self) -> Result<TcNla> {
+    fn parse(&self) -> Result<TcNla, DecodeError> {
         use self::TcNla::*;
         let payload = self.value();
         Ok(match self.kind() {
@@ -152,7 +152,6 @@ pub enum TcStats2Nla {
 }
 
 impl Nla for TcStats2Nla {
-    #[cfg_attr(nightly, rustfmt::skip)]
     fn value_len(&self) -> usize {
         use self::TcStats2Nla::*;
         match *self {
@@ -163,14 +162,13 @@ impl Nla for TcStats2Nla {
         }
     }
 
-    #[cfg_attr(nightly, rustfmt::skip)]
     fn emit_value(&self, buffer: &mut [u8]) {
         use self::TcStats2Nla::*;
         match *self {
             StatsApp(ref bytes) => buffer.copy_from_slice(bytes.as_slice()),
             StatsBasic(ref nla) => nla.to_bytes(buffer),
             StatsQueue(ref nla) => nla.to_bytes(buffer),
-            Other(ref nla)  => nla.emit_value(buffer),
+            Other(ref nla) => nla.emit_value(buffer),
         }
     }
 
@@ -186,7 +184,7 @@ impl Nla for TcStats2Nla {
 }
 
 impl<'buffer, T: AsRef<[u8]> + ?Sized> Parseable<TcStats2Nla> for NlaBuffer<&'buffer T> {
-    fn parse(&self) -> Result<TcStats2Nla> {
+    fn parse(&self) -> Result<TcStats2Nla, DecodeError> {
         use self::TcStats2Nla::*;
         let payload = self.value();
         Ok(match self.kind() {

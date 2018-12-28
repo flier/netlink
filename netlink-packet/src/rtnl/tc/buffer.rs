@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, NativeEndian};
 
-use {Field, Index, NlaBuffer, NlasIterator, Rest, Result};
+use {DecodeError, Field, Index, NlaBuffer, NlasIterator, Rest};
 
 const FAMILY: Index = 0;
 const PAD1: Index = 1;
@@ -70,7 +70,7 @@ impl<'a, T: AsRef<[u8]> + ?Sized> TcBuffer<&'a T> {
         &data[ATTRIBUTES]
     }
 
-    pub fn nlas(&self) -> impl Iterator<Item = Result<NlaBuffer<&'a [u8]>>> {
+    pub fn nlas(&self) -> impl Iterator<Item = Result<NlaBuffer<&'a [u8]>, DecodeError>> {
         NlasIterator::new(self.payload())
     }
 }

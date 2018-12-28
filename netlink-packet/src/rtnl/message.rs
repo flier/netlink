@@ -3,7 +3,7 @@ use failure::ResultExt;
 
 use crate::{
     AddressBuffer, AddressMessage, DecodeError, Emitable, LinkBuffer, LinkMessage, Parseable,
-    TcMessage,
+    TcBuffer, TcMessage,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -217,8 +217,10 @@ impl RtnlMessage {
             | RTM_NEWTFILTER
             | RTM_DELTFILTER
             | RTM_GETTFILTER => {
-                let msg: TcMessage = TcBuffer::new(&self.payload()).parse()?;
-                match header.message_type() {
+                let msg: TcMessage = TcBuffer::new(&buffer)
+                    .parse()
+                    .context("invalid tc message")?;
+                match message_type {
                     RTM_NEWQDISC => NewQueueDiscipline(msg),
                     RTM_DELQDISC => DelQueueDiscipline(msg),
                     RTM_GETQDISC => GetQueueDiscipline(msg),
@@ -231,6 +233,7 @@ impl RtnlMessage {
                     _ => unreachable!(),
                 }
             }
+
             _ => return Err(format!("Unknown message type: {}", message_type).into()),
         };
         Ok(message)
