@@ -32,3 +32,11 @@ audit = []
 [[example]]
 name = "dump_links"
 required-features = ["rtnetlink"]
+
+[dev-dependencies]
+criterion = "0.2"
+
+[[bench]]
+name = "link_message"
+harness = false
+required-features = ["rtnetlink"]
