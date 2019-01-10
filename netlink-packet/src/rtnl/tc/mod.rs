@@ -1,7 +1,7 @@
 mod buffer;
 mod message;
-mod nla;
+mod nlas;
 
 pub use self::buffer::*;
 pub use self::message::*;
-pub use self::nla::*;
+pub use self::nlas::*;

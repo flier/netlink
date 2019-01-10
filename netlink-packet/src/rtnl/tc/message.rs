@@ -1,6 +1,7 @@
-use super::{TcBuffer, TcNla};
 use failure::ResultExt;
-use {DecodeError, Emitable, Parseable, TC_HEADER_LEN};
+
+use super::{TcBuffer, TcNla};
+use crate::{DecodeError, Emitable, Parseable, TC_HEADER_LEN};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TcMessage {
